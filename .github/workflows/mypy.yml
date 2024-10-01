@@ -1,13 +1,15 @@
 name: Check Types with MyPy
 
-on: [push, pull_request]
+on:
+  [ push, pull_request ]
 
 jobs:
   mypy:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: [3.9]
+        os: [ ubuntu-latest, windows-latest ]
+        python-version: [ "3.12.6" ]
 
     steps:
       - name: Set up Git repository
@@ -18,7 +20,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
+      - name: Install requirements
         run: |
           python -m pip install --upgrade pip wheel setuptools
           python -m pip install -r requirements.txt
