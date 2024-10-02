@@ -1,11 +1,11 @@
 from math import *
 from typing import Union, List
 
-vectype = List[Union[int, float]]
+VECTYPE = List[Union[int, float]]
 
 
 class Vector:
-    def __init__(self, vector: vectype):
+    def __init__(self, vector: VECTYPE):
         if len(vector) == 0:
             raise ValueError("Vector must be non-empty")
         self.value = vector
@@ -38,7 +38,7 @@ class Vector:
 
         Parameters
         ----------
-        v: vectype
+        v: VECTYPE
             The vector to calculate the scalar product with
 
         Returns
@@ -73,7 +73,7 @@ class Vector:
 
         Parameters
         ----------
-        v: vectype
+        v: VECTYPE
             The vector to calculate the angle
 
         Returns

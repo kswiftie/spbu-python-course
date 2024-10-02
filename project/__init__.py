@@ -1,1 +1,1 @@
-from project import proj1
+from project import linalg

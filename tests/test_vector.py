@@ -1,7 +1,7 @@
 import pytest
 
 
-from project.proj1.vector import Vector
+from project.linalg.vector import Vector
 from math import *
 
 

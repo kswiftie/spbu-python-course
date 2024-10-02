@@ -1,5 +1,5 @@
 import pytest
-from project.proj1.matrix import Matrix
+from project.linalg.matrix import Matrix
 
 
 @pytest.mark.parametrize(

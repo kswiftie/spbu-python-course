@@ -1,11 +1,10 @@
 from typing import List, Union
 
-
-mtype = List[List[Union[int, float]]]
+MTYPE = List[List[Union[int, float]]]
 
 
 class Matrix:
-    def __init__(self, values: mtype):
+    def __init__(self, values: MTYPE):
         self.value = values
         if len(values) == 0 or len(values[0]) == 0:
             raise ValueError("The entered matrix is icorrect")
@@ -19,12 +18,12 @@ class Matrix:
 
         Parameters
         ----------
-        other: mtype
+        other: MTYPE
             Matrix with which to add the current matrix
 
         Returns
         -------
-        mtype
+        MTYPE
             Result from the addition
         """
         if len(self) != len(other) or len(self[0]) != len(other[0]):
