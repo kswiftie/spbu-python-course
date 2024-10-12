@@ -46,23 +46,23 @@ def curry_explicit(function: Callable, arity: int) -> Callable:
 
 def uncurry_explicit(function: Callable, arity) -> Callable:
     """
-        Decorator for converting a composition of functions into a function of several parameters
+    Decorator for converting a composition of functions into a function of several parameters
 
-        Parameters
-        ----------
-        function: Callable
-            Function to be uncurried
+    Parameters
+    ----------
+    function: Callable
+        Function to be uncurried
 
-        arity: int
-            Arity of function to be maded
-            This argument must correspond to the number of compositions
+    arity: int
+        Arity of function to be maded
+        This argument must correspond to the number of compositions
 
-        Returns
-        -------
-        res: Callable
-            Functions of several parameters
+    Returns
+    -------
+    res: Callable
+        Functions of several parameters
 
-        """
+    """
     if arity < 0:
         raise ValueError("Arity cannot be negative")
 

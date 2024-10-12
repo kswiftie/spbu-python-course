@@ -7,7 +7,7 @@ def mysum(*args):
 
 
 def check_isolation(*, d=Isolated()):
-    d['a'] = 0
+    d["a"] = 0
     return d
 
 

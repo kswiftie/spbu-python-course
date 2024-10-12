@@ -6,7 +6,7 @@ from utils import mysum
 @pytest.mark.parametrize(
     "function, function_arity, function_inputs, expected_result",
     [
-        (lambda x, y, z: f'<{x},{y},{z}>', 3, [123, 456, 562], "<123,456,562>"),
+        (lambda x, y, z: f"<{x},{y},{z}>", 3, [123, 456, 562], "<123,456,562>"),
         (mysum, 5, [1, 2, 3, 4, 5], 15),
         (mysum, 0, [], 0),
     ],
@@ -42,10 +42,20 @@ def test_curried_print(function, function_arity, function_inputs, expected_resul
 @pytest.mark.parametrize(
     "curried_function, function_arity, function_inputs, expected_result",
     [
-        (curry_explicit(lambda x, y, z: f'<{x},{y},{z}>', 3), 3, [123, 456, 562], "<123,456,562>"),
+        (
+            curry_explicit(lambda x, y, z: f"<{x},{y},{z}>", 3),
+            3,
+            [123, 456, 562],
+            "<123,456,562>",
+        ),
         (curry_explicit(mysum, 5), 5, [1, 2, 3, 4, 5], 15),
         (curry_explicit(mysum, 0), 0, [], 0),
     ],
 )
-def test_uncurried_functions(curried_function, function_arity, function_inputs, expected_result):
-    assert uncurry_explicit(curried_function, function_arity)(*function_inputs) == expected_result
+def test_uncurried_functions(
+    curried_function, function_arity, function_inputs, expected_result
+):
+    assert (
+        uncurry_explicit(curried_function, function_arity)(*function_inputs)
+        == expected_result
+    )
