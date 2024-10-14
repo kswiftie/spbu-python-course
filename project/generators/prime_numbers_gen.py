@@ -2,7 +2,7 @@ import functools
 from typing import Generator, Callable
 
 
-def get_prime_number(*, stopnumber: int = 1000) -> int:
+def get_prime_number(*, stopnumber: int = 1000):
     """
     Decorator for prime_seq_gen that counts the nth prime number
 
@@ -17,10 +17,9 @@ def get_prime_number(*, stopnumber: int = 1000) -> int:
         prime number by inputted number
     """
 
-    def wrapper(func: Callable) -> int:
+    def wrapper(func: Callable):
         @functools.wraps(func)
         def inner(n: int) -> int:
-            print(n)
             if n < 1:
                 raise ValueError("Number of prime number must be greater than 0")
             g = func(stopnumber)
