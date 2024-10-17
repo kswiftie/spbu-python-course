@@ -15,7 +15,8 @@ def get_rgba_vector(i: int) -> tuple[int, int, int, int]:
         for b in range(256)
         for g in range(256)
         for r in range(256)
-        for a in range(0, 101) if a % 2 == 0
+        for a in range(0, 101)
+        if a % 2 == 0
     )
     try:
         for _ in range(i):
