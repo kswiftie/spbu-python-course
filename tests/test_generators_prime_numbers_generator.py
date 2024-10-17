@@ -5,7 +5,7 @@ from project.generators import prime_seq_gen, get_prime_number
 @pytest.mark.parametrize(
     "function, args, expected",
     [
-        (get_prime_number(prime_seq_gen), [1, 2, 3, 4, 5], [2, 3, 5, 7, 11]),
+        (get_prime_number(prime_seq_gen), [1, 1, 2, 3, 4, 5], [2, 2, 3, 5, 7, 11]),
         (get_prime_number(prime_seq_gen), [12, 13], [37, 41]),
         (
             get_prime_number(prime_seq_gen),
