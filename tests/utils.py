@@ -1,4 +1,5 @@
 from project.decorators import Isolated, Evaluated
+from threading import Event
 import time
 
 
@@ -23,3 +24,24 @@ def check_evaluation_with_isolation(s=None, d=Isolated(), y=Evaluated(time.time)
     for x in d:
         d[x] = x
     return (s, y)
+
+
+def waste_time():
+    time.sleep(0.01)
+
+
+def wait_signal(event):
+    event.wait()
+    time.sleep(0.01)
+
+
+def remember_inputs(inp, st=set()):
+    for x in inp:
+        st.add(x)
+
+
+def get_function_execution_time(function, *args, **kwargs):
+    start = time.time()
+    function(*args, **kwargs)
+    end = time.time()
+    return end - start
