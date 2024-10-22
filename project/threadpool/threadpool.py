@@ -28,7 +28,7 @@ class Threadpool:
         self.threads = np.empty(num_threads, dtype=object)
         self.tasks: DEQTYPE = deque()
         self.event = Event()  # To signal the arrival of tasks
-        self.is_threads_opened = False
+        self.is_threads_closed = False
         for i in range(num_threads):  # Run threads
             self.threads[i] = Thread(target=self.runner)
             self.threads[i].start()
@@ -42,15 +42,11 @@ class Threadpool:
 
 
         """
-        while not self.is_threads_opened:
-            self.event.wait()
-            while self.tasks:
-                try:
-                    task, args, kwargs = self.tasks.popleft()
-                    result = task(*args, **kwargs)
-                except IndexError:
-                    break
-            self.event.clear()
+        self.event.wait()
+        while self.tasks:
+            task, args, kwargs = self.tasks.popleft()
+            result = task(*args, **kwargs)
+        self.event.clear()
 
     def enqueue(
         self, task: Callable, *args: List[Any], **kwargs: Dict[Any, Any]
@@ -70,7 +66,7 @@ class Threadpool:
             function kwargs
 
         """
-        if self.is_threads_opened:
+        if self.is_threads_closed:
             raise TypeError("Pool is closed")
         self.tasks.append((task, args, kwargs))
         self.event.set()
@@ -81,7 +77,7 @@ class Threadpool:
         After starting, new processes stop being added, and
         waiting for the completion of already running tasks begins
         """
-        self.is_threads_opened = True
+        self.is_threads_closed = True
         self.event.set()
         for thread in self.threads:
             thread.join()

@@ -1,6 +1,6 @@
+import itertools, time
 from project.decorators import Isolated, Evaluated
 from threading import Event
-import time
 
 
 def mysum(*args):
@@ -35,9 +35,10 @@ def wait_signal(event):
     time.sleep(0.01)
 
 
-def remember_inputs(inp, st=set()):
+def remember_inputs(inp, lock, st=set()):
     for x in inp:
-        st.add(x)
+        with lock:
+            st.add(x)
 
 
 def get_function_execution_time(function, *args, **kwargs):
@@ -45,3 +46,7 @@ def get_function_execution_time(function, *args, **kwargs):
     function(*args, **kwargs)
     end = time.time()
     return end - start
+
+
+def onethread_cartesian_sum(inp_set):
+    return sum(x + y for x, y in itertools.product(inp_set, repeat=2))

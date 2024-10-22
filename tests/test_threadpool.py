@@ -29,7 +29,7 @@ from utils import wait_signal, waste_time, remember_inputs
             [threading.Event() for _ in range(2)],
             [],
             0,
-            4,
+            2,
         ),
         (
             Threadpool(5),
@@ -122,8 +122,9 @@ def test_dispose(threadpool_model, funcs, number_tasks, number_threads):
 )
 def test_runner(threadpool_model, func, inputs, expected):
     to_remember = set()
+    lock = threading.Lock()
     for inp in inputs:
-        threadpool_model.enqueue(func, inp, st=to_remember)
+        threadpool_model.enqueue(func, inp, lock, st=to_remember)
 
     threadpool_model.dispose()
     assert to_remember == expected
