@@ -1,5 +1,6 @@
+import itertools, time
 from project.decorators import Isolated, Evaluated
-import time
+from threading import Event
 
 
 def mysum(*args):
@@ -23,3 +24,29 @@ def check_evaluation_with_isolation(s=None, d=Isolated(), y=Evaluated(time.time)
     for x in d:
         d[x] = x
     return (s, y)
+
+
+def waste_time():
+    time.sleep(0.01)
+
+
+def wait_signal(event):
+    event.wait()
+    time.sleep(0.01)
+
+
+def remember_inputs(inp, lock, st=set()):
+    for x in inp:
+        with lock:
+            st.add(x)
+
+
+def get_function_execution_time(function, *args, **kwargs):
+    start = time.time()
+    function(*args, **kwargs)
+    end = time.time()
+    return end - start
+
+
+def onethread_cartesian_sum(inp_set):
+    return sum(x + y for x, y in itertools.product(inp_set, repeat=2))
