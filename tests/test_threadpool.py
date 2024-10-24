@@ -29,7 +29,7 @@ from utils import wait_signal, waste_time, remember_inputs
             [threading.Event() for _ in range(2)],
             [],
             0,
-            2,
+            4,
         ),
         (
             Threadpool(5),
@@ -128,6 +128,34 @@ def test_runner(threadpool_model, func, inputs, expected):
 
     threadpool_model.dispose()
     assert to_remember == expected
+
+
+@pytest.mark.parametrize(
+    "threadpool_model, group_of_inputs, count_before_dispose, expected",
+    [
+        (Threadpool(5), [[waste_time for _ in range(5)] for _ in range(2)], False, 0),
+        (Threadpool(5), [[waste_time for _ in range(5)] for _ in range(2)], True, 0),
+        (Threadpool(5), [[waste_time for _ in range(7)] for _ in range(2)], False, 0),
+        (Threadpool(5), [[waste_time for _ in range(7)] for _ in range(2)], True, 0),
+    ],
+)
+def test_runner_few_groups_of_inputs(
+    threadpool_model, group_of_inputs, count_before_dispose, expected
+):
+    for group in group_of_inputs:
+        for func in group:
+            threadpool_model.enqueue(func)
+        time.sleep(0.5)
+
+    if count_before_dispose:
+        tasks_count = len(threadpool_model.tasks)
+        threadpool_model.dispose()
+    else:
+        threadpool_model.dispose()
+        time.sleep(0.2)
+        tasks_count = len(threadpool_model.tasks)
+
+    assert tasks_count == expected
 
 
 @pytest.mark.parametrize(

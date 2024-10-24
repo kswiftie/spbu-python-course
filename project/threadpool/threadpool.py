@@ -24,6 +24,7 @@ class Threadpool:
         num_threads: int
             Function to be curried
         """
+
         self.num_threads = num_threads
         self.threads = np.empty(num_threads, dtype=object)
         self.tasks: DEQTYPE = deque()
@@ -39,14 +40,14 @@ class Threadpool:
         When initializing the class, it runs in a separate thread and
         waits for self.event to become True and
         for tasks to appear in self.tasks
-
-
         """
-        self.event.wait()
-        while self.tasks:
-            task, args, kwargs = self.tasks.popleft()
-            result = task(*args, **kwargs)
-        self.event.clear()
+
+        while not self.is_threads_closed:
+            self.event.wait()
+            while self.tasks:
+                task, args, kwargs = self.tasks.popleft()
+                result = task(*args, **kwargs)
+            self.event.clear()
 
     def enqueue(
         self, task: Callable, *args: List[Any], **kwargs: Dict[Any, Any]
@@ -64,8 +65,8 @@ class Threadpool:
 
         kwargs: Dict
             function kwargs
-
         """
+
         if self.is_threads_closed:
             raise TypeError("Pool is closed")
         self.tasks.append((task, args, kwargs))
@@ -77,6 +78,7 @@ class Threadpool:
         After starting, new processes stop being added, and
         waiting for the completion of already running tasks begins
         """
+
         self.is_threads_closed = True
         self.event.set()
         for thread in self.threads:
