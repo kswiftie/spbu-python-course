@@ -1,14 +1,34 @@
 from typing import List, Dict, Callable, Any
 import random
 
-AVAILABLE_BETS = ["Black", "Red", "Even", "Odd", "Small", "Big", "Dozen", "Sixline", "Street", "Split",
-                  "Straight Up"]
+AVAILABLE_BETS = [
+    "Black",
+    "Red",
+    "Even",
+    "Odd",
+    "Small",
+    "Big",
+    "Dozen",
+    "Sixline",
+    "Street",
+    "Split",
+    "Straight Up",
+]
 
 DOZENS = {1: lambda x: 0 < x < 13, 2: lambda x: 12 < x < 25, 3: lambda x: 24 < x}
-WINNING_COEF = {"Black": lambda x: x, "Red": lambda x: x, "Even": lambda x: x, "Odd": lambda x: x, "Small": lambda x: x,
-                "Big": lambda x: x, "Dozen": lambda x: x * 2, "Sixline": lambda x: x * 5, "Street": lambda x: x * 11,
-                "Split": lambda x: x * 17,
-                "Straight Up": lambda x: x * 35}
+WINNING_COEF = {
+    "Black": lambda x: x,
+    "Red": lambda x: x,
+    "Even": lambda x: x,
+    "Odd": lambda x: x,
+    "Small": lambda x: x,
+    "Big": lambda x: x,
+    "Dozen": lambda x: x * 2,
+    "Sixline": lambda x: x * 5,
+    "Street": lambda x: x * 11,
+    "Split": lambda x: x * 17,
+    "Straight Up": lambda x: x * 35,
+}
 LOSING_COEF: Callable[[int], int] = lambda x: 0
 BLACK = [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 28, 29, 31, 33, 35]
 RED = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]
@@ -26,7 +46,7 @@ class Table:
 
     """
 
-    def __int__(self, rules: tuple[int, Any], **players) -> None:
+    def __int__(self, rules: tuple[int, ...], **players) -> None:
         """
         *Description*
 
@@ -46,14 +66,18 @@ class Table:
         self.rules = rules
         self.players: Dict[str, object] = players
 
-    def get_round_results(self, bets: Dict[str, tuple]) -> Dict[str, Callable[[int], int]]:
+    def get_round_results(
+        self, bets: Dict[str, tuple]
+    ) -> Dict[str, Callable[[int], int]]:
         winners = {}
         result = random.randint(0, 36)
         for bettype, betvalues in bets.items():
             winners[bettype] = self.is_bet_win(bettype, betvalues, result)
         return winners
 
-    def is_bet_win(self, bettype: str, betvalues: tuple[Any], result: int) -> Callable[[int], int]:
+    def is_bet_win(
+        self, bettype: str, betvalues: tuple[Any], result: int
+    ) -> Callable[[int], int]:
         if bettype not in AVAILABLE_BETS:
             raise ValueError("Unknown Bet")
 
@@ -70,9 +94,17 @@ class Table:
         if bettype == "Small":
             return get_payment_based_on_bet(bettype) if 0 < result < 19 else LOSING_COEF
         if bettype == "Dozen":
-            return get_payment_based_on_bet(bettype) if DOZENS[betvalues[0]](result) else LOSING_COEF
+            return (
+                get_payment_based_on_bet(bettype)
+                if DOZENS[betvalues[0]](result)
+                else LOSING_COEF
+            )
         if bettype in ["Sixline", "Street", "Split", "Straight up"]:
-            return get_payment_based_on_bet(bettype) if result in betvalues else LOSING_COEF
+            return (
+                get_payment_based_on_bet(bettype)
+                if result in betvalues
+                else LOSING_COEF
+            )
 
         return LOSING_COEF
 
@@ -82,11 +114,13 @@ class Table:
 
     def game_with_rule_1(self, number_of_rounds, init_money) -> None:
         print("Game is starting...")
-        print(f"""
+        print(
+            f"""
 Rules:
 There will be {number_of_rounds} rounds in the game.
 Initially, everyone has {init_money} money
-""")
+"""
+        )
         print("The players at the table: ", end="")
         for x in self.players:
             print(x, end=" ")
