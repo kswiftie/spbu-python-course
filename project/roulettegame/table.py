@@ -1,5 +1,7 @@
-from typing import List, Dict, Callable, Any
 import random
+from typing import List, Dict, Callable, Any
+from .check_game_rules import check_game_rules
+from .bot import Bot
 
 AVAILABLE_BETS = [
     "Black",
@@ -29,10 +31,10 @@ WINNING_COEF = {
     "Split": lambda x: x * 17,
     "Straight Up": lambda x: x * 35,
 }
-LOSING_COEF: Callable[[int], int] = lambda x: 0
+LOSING_COEF: Callable[[int], int] = lambda x: -x
 BLACK = [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 28, 29, 31, 33, 35]
 RED = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]
-AVAILABLE_GAME_RULES = [1]
+AVAILABLE_PLAYERS = Bot
 
 
 def get_payment_based_on_bet(bettype: str) -> Callable[[int], int]:
@@ -46,37 +48,40 @@ class Table:
 
     """
 
-    def __int__(self, rules: tuple[int, ...], **players) -> None:
+    def __init__(
+        self, game_rules: tuple[Any, ...], **players: AVAILABLE_PLAYERS
+    ) -> None:
         """
         *Description*
 
         Parameters
         ----------
-        rules: int
-            Variable for setting the rules in the game
-            1 parameter is the type of rules, 2 parameter
-            is the refinement of rules for those specified in 1 type
-            The following types of rules are currently available:
-            1 - The game will continue for a certain number of moves
+        game_rules: int
+            For more information, see docs/Roulette/game_rules
+
         players: Dict[str, object]
             *description*
         """
-        if rules[0] not in AVAILABLE_GAME_RULES:
-            raise ValueError(f"Argument rules must be in {AVAILABLE_GAME_RULES}")
-        self.rules = rules
-        self.players: Dict[str, object] = players
+
+        check_game_rules(game_rules)
+
+        self.game_rules = game_rules
+        self.players: Dict[str, AVAILABLE_PLAYERS] = players
 
     def get_round_results(
-        self, bets: Dict[str, tuple]
+        self, bets: Dict[str, tuple[Any, ...]]
     ) -> Dict[str, Callable[[int], int]]:
-        winners = {}
+        round_results = {}
         result = random.randint(0, 36)
-        for bettype, betvalues in bets.items():
-            winners[bettype] = self.is_bet_win(bettype, betvalues, result)
-        return winners
+        print(f"{result} on the wheel!")
+        for player_name, (bettype, *betvalues) in bets.items():
+            round_results[player_name] = self.is_bet_win(
+                bettype, tuple(betvalues), result
+            )
+        return round_results
 
     def is_bet_win(
-        self, bettype: str, betvalues: tuple[Any], result: int
+        self, bettype: str, betvalues: tuple[Any, ...], result: int
     ) -> Callable[[int], int]:
         if bettype not in AVAILABLE_BETS:
             raise ValueError("Unknown Bet")
@@ -109,11 +114,11 @@ class Table:
         return LOSING_COEF
 
     def start_the_game(self) -> None:
-        if self.rules[0] == 1:
-            self.game_with_rule_1(self.rules[1], self.rules[2])
-
-    def game_with_rule_1(self, number_of_rounds, init_money) -> None:
         print("Game is starting...")
+        if self.game_rules[0] == "ByMoves":
+            self.game_with_rule_1(self.game_rules[1], self.game_rules[2])
+
+    def game_with_rule_1(self, number_of_rounds: int, init_money: int) -> None:
         print(
             f"""
 Rules:
@@ -122,12 +127,56 @@ Initially, everyone has {init_money} money
 """
         )
         print("The players at the table: ", end="")
-        for x in self.players:
-            print(x, end=" ")
-        for round_number in range(number_of_rounds):
-            print(f"The beginning of the {round_number} round. Place your bets")
+        players_status = dict().fromkeys(self.players.keys(), init_money)
+        eliminated_players = []
+        for player_name in self.players:
+            print(player_name, end=" ")
 
-    def add_player(self, player: tuple[str, object]) -> None:
+        for round_number in range(1, number_of_rounds + 1):
+            print(f"\nPlayer's money at the beginning of the round {round_number}:")
+
+            for (
+                player_name,
+                player_money,
+            ) in players_status.items():  # Players stats of current round
+                print(f"{player_name} have {player_money} coins")
+                if player_money < 1 and player_name not in eliminated_players:
+                    print(f"{player_name} lost. He's not betting anymore")
+                    eliminated_players.append(player_name)
+
+            print(f"\nThe beginning of the {round_number} round. Place your bets")
+            bets_types, bets_amount = {}, {}
+            for (
+                player_name,
+                player_money,
+            ) in players_status.items():  # Getting bets from players
+                bets_types[player_name], bets_amount[player_name] = self.players[
+                    player_name
+                ].play_game_with_rule1(round_number, player_money)
+                print(f"Player {player_name} bet on {bets_types[player_name]}")
+
+            round_results = self.get_round_results(bets_types)
+            print("\nRound results:")
+            for player_name, player_money in players_status.items():
+                player_result = round_results[player_name](bets_amount[player_name])
+                print(
+                    f"{player_name} has won {player_result}"
+                    if player_result > 0
+                    else f"{player_name} has lost {-player_result}"
+                )
+                players_status[player_name] += player_result
+        print("\nThe results of the game:")
+        max_money = max(players_status.values())
+        for player_name, player_money in players_status.items():
+            print(f"Player {player_name} has {player_money} coins")
+
+        # todo: Write that there are several winners, if there are several of them
+        # bc now im writing them as if they didn't win together
+        for player_name, player_money in players_status.items():
+            if player_money == max_money:
+                print(f"\nPlayer {player_name} won the game!")
+
+    def add_player(self, player: tuple[str, AVAILABLE_PLAYERS]) -> None:
         if player[0] in self.players:
             raise ValueError("A player with that name is already sitting at the table")
         print(f"Player {player[0]} sat down at the table")
